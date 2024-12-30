@@ -1,0 +1,9 @@
+set(REQUIRED_COMPONENTS
+	Core
+	Concurrent
+	Network
+)
+
+find_package(Qt5 COMPONENTS ${REQUIRED_COMPONENTS} REQUIRED)
+
+set(CMAKE_AUTOMOC ON)

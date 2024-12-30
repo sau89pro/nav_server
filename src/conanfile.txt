@@ -1,0 +1,12 @@
+[requires]
+qt/5.15.16
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout
+
+[options]
+qt/*:shared=True
