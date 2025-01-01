@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.15)
 
 project(NavServer)
 
@@ -10,8 +10,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${RUNTIME_OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${RUNTIME_OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${RUNTIME_OUTPUT_DIR})
 
-#list(APPEND CMAKE_PREFIX_PATH ${RUNTIME_OUTPUT_DIR})
-
 include(cmake/setup_qt.cmake)
+include(${CMAKE_BINARY_DIR}/conan/build/generators/conan_toolchain.cmake)
 
 add_subdirectory(server)
+
+if (MSVC)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+                          VS_DEBUGGER_COMMAND ${RUNTIME_OUTPUT_DIR}/${PROJECT_NAME}.exe
+                          VS_DEBUGGER_WORKING_DIRECTORY ${RUNTIME_OUTPUT_DIR}
+    )
+endif (MSVC)
