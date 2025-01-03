@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QByteArray>
 #include <QObject>
 #include <QTcpServer>
 #include <QVector>
@@ -14,9 +15,10 @@ public:
 
 private:
 	QTcpServer m_server;
-	QVector<QTcpSocket*> m_pSockets;
+	QByteArray m_htmlPage;
+	QByteArray m_css;
 
 private slots:
 	void OnNewConnection();
-	void OnNewData();
+	void Response(QTcpSocket *socket);
 };
