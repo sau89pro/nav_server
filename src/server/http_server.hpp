@@ -3,7 +3,6 @@
 #include <QByteArray>
 #include <QObject>
 #include <QTcpServer>
-#include <QVector>
 
 class QTcpSocket;
 
@@ -17,6 +16,7 @@ private:
 	QTcpServer m_server;
 	QByteArray m_htmlPage;
 	QByteArray m_css;
+	QByteArray m_fav;
 
 private slots:
 	void OnNewConnection();

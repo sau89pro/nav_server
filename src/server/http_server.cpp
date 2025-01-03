@@ -5,8 +5,9 @@
 #include <QHostAddress>
 #include <QString>
 #include <QTcpSocket>
+#include <QTextStream>
 
-const QString g_responseTemplate = QStringLiteral("HTTP/1.1 200 OK\r\n\r\n%1");
+const QString g_responseTemplate = QStringLiteral("HTTP/1.1 200 OK\r\n\r\n");
 const QByteArray g_responseErr = "HTTP/1.1 404 Not Found";
 
 HttpServer::HttpServer(QObject* parent) :
@@ -21,7 +22,7 @@ HttpServer::HttpServer(QObject* parent) :
 		if (htmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		{
 			QTextStream in(&htmlFile);
-			m_htmlPage = QString(g_responseTemplate).arg(in.readAll()).toUtf8();
+			m_htmlPage = (g_responseTemplate + in.readAll()).toUtf8();
 		}
 
 		QFile cssFile(QStringLiteral("app.css"));
@@ -29,7 +30,14 @@ HttpServer::HttpServer(QObject* parent) :
 		if (cssFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		{
 			QTextStream in(&cssFile);
-			m_css = QString(g_responseTemplate).arg(in.readAll()).toUtf8();
+			m_css = (g_responseTemplate + in.readAll()).toUtf8();
+		}
+
+		QFile favFile(QStringLiteral("images/favicon.ico"));
+
+		if (favFile.open(QIODevice::ReadOnly))
+		{
+			m_fav = g_responseTemplate.toUtf8() + favFile.readAll();
 		}
 	}
 	else
@@ -61,6 +69,10 @@ void HttpServer::Response(QTcpSocket *socket)
 	else if (request.startsWith(QStringLiteral("GET /app.css HTTP/1.1")))
 	{
 		socket->write(m_css);
+	}
+	else if (request.startsWith(QStringLiteral("GET /favicon.ico HTTP/1.1")))
+	{
+		socket->write(m_fav);
 	}
 	else
 	{
