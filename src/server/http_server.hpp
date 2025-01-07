@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QByteArray>
+#include <QHash>
 #include <QObject>
+#include <QString>
 #include <QTcpServer>
 
 class QTcpSocket;
@@ -15,8 +17,7 @@ public:
 private:
 	QTcpServer m_server;
 	QByteArray m_htmlPage;
-	QByteArray m_css;
-	QByteArray m_fav;
+	QHash<QString, QByteArray> m_gui;
 
 private slots:
 	void OnNewConnection();

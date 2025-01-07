@@ -1,7 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-const buildPath = '../../build/bin';
+const buildPath = '../../build/bin/gui';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -12,7 +12,7 @@ const config = {
 	kit: {
 		adapter: adapter({
 			pages: buildPath,
-			assets: buildPath,
+			assets: `${buildPath}/assets`,
 			fallback: undefined,
 			precompress: false,
 			strict: true
