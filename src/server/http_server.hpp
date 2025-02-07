@@ -18,6 +18,7 @@ private:
 	QTcpServer m_server;
 	QByteArray m_htmlPage;
 	QHash<QString, QByteArray> m_gui;
+	QHash<QString, QByteArray> m_assets;
 
 private slots:
 	void OnNewConnection();

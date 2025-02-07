@@ -50,12 +50,18 @@ HttpServer::HttpServer(QObject* parent) :
 			qWarning().noquote() << QStringLiteral("HttpServer: can't open html");
 		}
 
-		/*QFile favFile(QStringLiteral("images/favicon.ico"));
+		QFile favFile(QStringLiteral("gui/assets/favicon.ico"));
 
 		if (favFile.open(QIODevice::ReadOnly))
 		{
-			m_fav = g_responseTemplate.toUtf8() + favFile.readAll();
-		}*/
+			const QString key = QStringLiteral("GET /favicon.ico HTTP/1.1\r\n");
+			const QByteArray value = g_responseTemplate.toUtf8() + favFile.readAll();
+			m_assets.insert(key, value);
+		}
+		else
+		{
+			qWarning().noquote() << QStringLiteral("HttpServer: can't open asset ") << favFile.fileName();
+		}
 	}
 	else
 	{
@@ -86,6 +92,10 @@ void HttpServer::Response(QTcpSocket *socket)
 	else if (m_gui.contains(request))
 	{
 		socket->write(m_gui[request]);
+	}
+	else if (m_assets.contains(request))
+	{
+		socket->write(m_assets[request]);
 	}
 	else
 	{
