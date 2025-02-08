@@ -16,57 +16,83 @@ HttpServer::HttpServer(QObject* parent) :
 {
 	if (m_server.listen(QHostAddress::LocalHost, 8000))
 	{
+		UpdateGUIData();
 		connect(&m_server, &QTcpServer::newConnection, this, &HttpServer::OnNewConnection);
 
-		QDirIterator it(QStringLiteral("gui/assets/_app/immutable"), {"*.css", "*.js"}, QDir::Files, QDirIterator::Subdirectories);
-
-		while (it.hasNext())
+		if (auto* pApp = Application::GetInstance())
 		{
-			QString path = it.next();
-			QFile file(path);
-
-			if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-			{
-				QTextStream in(&file);
-				const QString key = QStringLiteral("GET ") + path.replace(QStringLiteral("gui/assets"), "") + QStringLiteral(" HTTP/1.1\r\n");
-				const QByteArray value = (g_responseTemplate + in.readAll()).toUtf8();
-				m_gui.insert(key, value);
-			}
-			else
-			{
-				qWarning().noquote() << QStringLiteral("HttpServer: can't open file ") << path;
-			}
-		}
-
-		QFile htmlFile(QStringLiteral("gui/index.html"));
-
-		if (htmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
-		{
-			QTextStream in(&htmlFile);
-			m_htmlPage = (g_responseTemplate + in.readAll()).toUtf8();
-		}
-		else
-		{
-			qWarning().noquote() << QStringLiteral("HttpServer: can't open html");
-		}
-
-		QFile favFile(QStringLiteral("gui/assets/favicon.ico"));
-
-		if (favFile.open(QIODevice::ReadOnly))
-		{
-			const QString key = QStringLiteral("GET /favicon.ico HTTP/1.1\r\n");
-			const QByteArray value = g_responseTemplate.toUtf8() + favFile.readAll();
-			m_assets.insert(key, value);
-		}
-		else
-		{
-			qWarning().noquote() << QStringLiteral("HttpServer: can't open asset ") << favFile.fileName();
+			connect(pApp, &Application::ConsoleCommandReceived, this, &HttpServer::OnConsoleCommandReceived);
 		}
 	}
 	else
 	{
 		qCritical().noquote() << QString("HttpServer: unable to start the server: %1").arg(m_server.errorString());
 		m_server.close();
+	}
+}
+
+void HttpServer::UpdateGUIData()
+{
+	QDirIterator it(QStringLiteral("gui/assets/_app/immutable"), { "*.css", "*.js" }, QDir::Files, QDirIterator::Subdirectories);
+
+	while (it.hasNext())
+	{
+		QString path = it.next();
+		QFile file(path);
+
+		if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+		{
+			QTextStream in(&file);
+			const QString key = QStringLiteral("GET ") + path.replace(QStringLiteral("gui/assets"), "") + QStringLiteral(" HTTP/1.1\r\n");
+			const QByteArray value = (g_responseTemplate + in.readAll()).toUtf8();
+			m_gui.insert(key, value);
+		}
+		else
+		{
+			qWarning().noquote() << QStringLiteral("HttpServer::UpdateGUI: can't open file ") << path;
+		}
+	}
+
+	QFile htmlFile(QStringLiteral("gui/index.html"));
+
+	if (htmlFile.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		QTextStream in(&htmlFile);
+		m_htmlPage = (g_responseTemplate + in.readAll()).toUtf8();
+	}
+	else
+	{
+		qWarning().noquote() << QStringLiteral("HttpServer::UpdateGUI: can't open html");
+	}
+
+	QFile favFile(QStringLiteral("gui/assets/favicon.ico"));
+
+	if (favFile.open(QIODevice::ReadOnly))
+	{
+		const QString key = QStringLiteral("GET /favicon.ico HTTP/1.1\r\n");
+		const QByteArray value = g_responseTemplate.toUtf8() + favFile.readAll();
+		m_assets.insert(key, value);
+	}
+	else
+	{
+		qWarning().noquote() << QStringLiteral("HttpServer::UpdateGUI: can't open asset ") << favFile.fileName();
+	}
+}
+
+void HttpServer::OnConsoleCommandReceived(QByteArray command)
+{
+	if (!command.startsWith("server"))
+	{
+		return;
+	}
+	
+	if (command == "server_update_gui")
+	{
+		UpdateGUIData();
+	}
+	else
+	{
+		qWarning() << "HttpServer::OnInput: unknown command = " << command;
 	}
 }
 

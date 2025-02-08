@@ -1,4 +1,6 @@
 add_executable(${PROJECT_NAME}
+	app.cpp
+	app.hpp
 	http_server.cpp
 	http_server.hpp
 	main.cpp

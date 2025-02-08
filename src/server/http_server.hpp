@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app.hpp"
 #include <QByteArray>
 #include <QHash>
 #include <QObject>
@@ -11,10 +12,13 @@ class QTcpSocket;
 class HttpServer : public QObject
 {
 	Q_OBJECT
+
 public:
 	explicit HttpServer(QObject* parent = nullptr);
 
 private:
+	void UpdateGUIData();
+
 	QTcpServer m_server;
 	QByteArray m_htmlPage;
 	QHash<QString, QByteArray> m_gui;
@@ -23,4 +27,5 @@ private:
 private slots:
 	void OnNewConnection();
 	void Response(QTcpSocket *socket);
+	void OnConsoleCommandReceived(QByteArray command);
 };
